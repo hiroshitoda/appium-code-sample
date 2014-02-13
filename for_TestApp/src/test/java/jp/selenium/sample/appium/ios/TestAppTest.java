@@ -6,45 +6,44 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
+import org.junit.*;
+import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
+import org.openqa.selenium.*;
+import org.openqa.selenium.remote.*;
 
 /**
  * Sample codes for appium
  *
  */
-public class TestApp
+public class TestAppTest
 {
-    private static String hostname = "0.0.0.0";
-    private static int port = 4723;
+    RemoteWebDriver wd;
+
+    private String hostname = "0.0.0.0";
+    private int port = 4723;
     
     /**
      * app path like "/Users/foobar/Library/Developer/Xcode/DerivedData/TestApp-aqswedfrtgyhuj/Build/Products/Debug-iphonesimulator/TestApp.app"
      */
     // private static String appPath = "TestApp.app";
-    private static String appPath = "/please/replace/path/to/TestApp.app";
+    private static String appPath = "TestApp.app";
     
-    public static void main(String[] args)
+    @Test
+    public void testSample() throws Exception
     {
-        RemoteWebDriver wd;
-        try
-        {
-            wd = (RemoteWebDriver) init();
-        }
-        catch (Exception exception)
-        {
-            exception.printStackTrace();
-            return;
-        }
-        
         wd.findElement(By.name("TextField1")).sendKeys("12345");
         wd.findElement(By.name("TextField2")).sendKeys("67890");
+        wd.findElement(By.name("Done")).click();
+        
+        wd.switchTo().defaultContent();
+
         wd.findElement(By.name("ComputeSumButton")).click();
         wd.findElement(By.name("show alert")).click();
         wd.switchTo().alert().accept();
+        
+        wd.switchTo().defaultContent();
+
         wd.executeScript(
                 "mobile: swipe",
                 new HashMap<String, Double>()
@@ -59,12 +58,26 @@ public class TestApp
                     }
                 }
             );
-        wd.close();
+
+        wd.executeScript(
+                "mobile: swipe",
+                new HashMap<String, Double>()
+                {
+                    {
+                        put("touchCount", 1.0);
+                        put("startX", 200.0);
+                        put("startY", 302.0);
+                        put("endX", 100.0);
+                        put("endY", 300.0);
+                        put("duration", 0.8339844);
+                    }
+                }
+            );
     }
     
-    private static WebDriver init() throws Exception
+    @Before
+    public void setUp() throws Exception
     {
-        RemoteWebDriver wd;
         DesiredCapabilities capabilities = new DesiredCapabilities();
         String hubURLStringFormat = "http://%s:%d/wd/hub";
 
@@ -93,7 +106,12 @@ public class TestApp
                 60,
                 TimeUnit.SECONDS
             );
-        
-        return wd;
     }
+    
+    @After
+    public void tearDown() throws Exception
+    {
+        wd.quit();
+    }
+
 }
